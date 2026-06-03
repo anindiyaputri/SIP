@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIP-Sekolah | Sistem Informasi Perpustakaan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="header-logo">
+            <i class="fa-solid fa-book-open-reader icon-yellow"></i>
+            <span class="header-title">SIP-Sekolah (SMP/SMA)</span>
+        </div>
+        <div class="header-actions">
+            <span id="roleBadge" class="badge-admin">
+                <i class="fa-solid fa-user-shield"></i> Mode Petugas (Admin)
+            </span>
+            <button onclick="toggleRole()" class="btn-toggle">
+                <i class="fa-solid fa-arrows-rotate"></i> Ganti Role
+            </button>
+        </div>
+    </header>
+
+    <div class="app-layout">
+        
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <div class="menu-section-title">Menu Utama</div>
+                <nav id="sidebarMenu" class="nav-menu">
+                    <button onclick="switchTab('dashboard')" id="menu-dashboard" class="sidebar-item active">
+                        <i class="fa-solid fa-chart-pie icon-blue"></i> <span>Dashboard</span>
+                    </button>
+                    <button onclick="switchTab('buku')" id="menu-buku" class="sidebar-item">
+                        <i class="fa-solid fa-book icon-emerald"></i> <span>Data Buku</span>
+                    </button>
+                    <button onclick="switchTab('anggota')" id="menu-anggota" class="sidebar-item">
+                        <i class="fa-solid fa-users icon-purple"></i> <span>Data Anggota</span>
+                    </button>
+                    <button onclick="switchTab('sirkulasi')" id="menu-sirkulasi" class="sidebar-item">
+                        <i class="fa-solid fa-hand-holding-hand icon-amber"></i> <span>Peminjaman</span>
+                    </button>
+                    <button onclick="switchTab('laporan')" id="menu-laporan" class="sidebar-item">
+                        <i class="fa-solid fa-file-invoice icon-rose"></i> <span>Laporan</span>
+                    </button>
+                    
+                    <div class="menu-section-title pt-4-border">Akses Siswa</div>
+                    <button onclick="switchTab('cari')" id="menu-cari" class="sidebar-item">
+                        <i class="fa-solid fa-magnifying-glass icon-cyan"></i> <span>Cari Buku</span>
+                    </button>
+                    <button onclick="switchTab('statusSiswa')" id="menu-statusSiswa" class="sidebar-item hidden">
+                        <i class="fa-solid fa-clock-rotate-left icon-orange"></i> <span>Status Pinjam Saya</span>
+                    </button>
+                </nav>
+            </div>
+            <div class="sidebar-footer">
+                v1.0 &copy; Anindiya Putri
+            </div>
+        </aside>
+
+        <main class="main-content">
+            
+            <section id="tab-dashboard" class="tab-content">
+                <div class="content-heading">
+                    <h1>Panel Ringkasan (Dashboard)</h1>
+                    <p>Status real-time data dan aktivitas operasional perpustakaan sekolah.</p>
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="card-stat border-emerald">
+                        <div>
+                            <p class="stat-title">Total Buku (Katalog)</p>
+                            <h3 id="statTotalBuku" class="stat-number">0</h3>
+                        </div>
+                        <div class="stat-icon bg-emerald-light text-emerald"><i class="fa-solid fa-book"></i></div>
+                    </div>
+                    <div class="card-stat border-purple">
+                        <div>
+                            <p class="stat-title">Total Anggota Terdaftar</p>
+                            <h3 id="statTotalAnggota" class="stat-number">0</h3>
+                        </div>
+                        <div class="stat-icon bg-purple-light text-purple"><i class="fa-solid fa-users"></i></div>
+                    </div>
+                    <div class="card-stat border-amber">
+                        <div>
+                            <p class="stat-title">Sedang Dipinjam</p>
+                            <h3 id="statTotalPinjam" class="stat-number">0</h3>
+                        </div>
+                        <div class="stat-icon bg-amber-light text-amber"><i class="fa-solid fa-hand-holding-hand"></i></div>
+                    </div>
+                    <div class="card-stat border-blue">
+                        <div>
+                            <p class="stat-title">Jam Operasional</p>
+                            <h3 class="stat-text-normal">07:30 - 15:00 WIB</h3>
+                        </div>
+                        <div class="stat-icon bg-blue-light text-blue"><i class="fa-solid fa-clock"></i></div>
+                    </div>
+                </div>
+
+                <div class="card-log">
+                    <h2 class="log-heading"><i class="fa-solid fa-clock-rotate-left text-blue"></i>Log Aktivitas Sistem Terkini</h2>
+                    <div id="logContainer" class="log-container">
+                    </div>
+                </div>
+            </section>
+
+            <section id="tab-buku" class="tab-content hidden">
+                <div class="content-header-row">
+                    <div>
+                        <h1>Manajemen Data Buku</h1>
+                        <p>Kelola katalog, entitas pengarang, penerbit, dan update stok buku otomatis.</p>
+                    </div>
+                    <button onclick="openModal('modalBuku')" class="btn btn-emerald">
+                        <i class="fa-solid fa-plus"></i> Tambah Buku
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="main-table">
+                        <thead>
+                            <tr>
+                                <th>Kode Buku</th>
+                                <th>Judul</th>
+                                <th>Pengarang</th>
+                                <th>Kategori</th>
+                                <th class="text-center">Stok (Tersedia)</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBukuBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="tab-anggota" class="tab-content hidden">
+                <div class="content-header-row">
+                    <div>
+                        <h1>Manajemen Anggota</h1>
+                        <p>Pendaftaran dan pencatatan identitas unik kartu siswa/guru.</p>
+                    </div>
+                    <button onclick="openModal('modalAnggota')" class="btn btn-purple">
+                        <i class="fa-solid fa-user-plus"></i> Tambah Anggota
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="main-table">
+                        <thead>
+                            <tr>
+                                <th>ID Anggota</th>
+                                <th>Nama Lengkap</th>
+                                <th>Tipe / Kelas</th>
+                                <th>Kontak</th>
+                                <th class="text-center">Status Keaktifan</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableAnggotaBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="tab-sirkulasi" class="tab-content hidden">
+                <div class="content-header-row">
+                    <div>
+                        <h1>Sirkulasi & Validasi Transaksi</h1>
+                        <p>Mencatat peminjaman dan pengembalian (Mengecek Validasi Anggota & Ketersediaan Buku).</p>
+                    </div>
+                    <button onclick="openModal('modalSirkulasi')" class="btn btn-amber">
+                        <i class="fa-solid fa-hand-holding-hand"></i> Transaksi Baru
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table class="main-table">
+                        <thead>
+                            <tr>
+                                <th>ID Transaksi</th>
+                                <th>Anggota</th>
+                                <th>Buku</th>
+                                <th>Tgl Pinjam</th>
+                                <th>Batas Kembali</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableSirkulasiBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="tab-laporan" class="tab-content hidden printable-area">
+                <div class="content-heading">
+                    <h1>Laporan & Rekapitulasi Perpustakaan</h1>
+                    <p>Dokumen rekap operasional resmi untuk kebutuhan monitoring pimpinan.</p>
+                </div>
+
+                <div class="report-grid no-print">
+                    <div class="card-report">
+                        <div class="card-report-body">
+                            <div class="report-icon-box text-emerald bg-emerald-light"><i class="fa-solid fa-file-excel"></i></div>
+                            <h3>Laporan Inventaris Buku</h3>
+                            <p>Ekspor seluruh data katalog buku beserta status jumlah stok saat ini.</p>
+                        </div>
+                        <div class="report-actions">
+                            <button onclick="cetakDokumen('Buku')" class="btn-report-print">Cetak Laporan</button>
+                        </div>
+                    </div>
+                    <div class="card-report">
+                        <div class="card-report-body">
+                            <div class="report-icon-box text-purple bg-purple-light"><i class="fa-solid fa-id-card"></i></div>
+                            <h3>Daftar Anggota Aktif</h3>
+                            <p>Data rekapitulasi jumlah siswa dan staf pengajar yang terdaftar aktif.</p>
+                        </div>
+                        <div class="report-actions">
+                            <button onclick="cetakDokumen('Anggota')" class="btn-report-print">Cetak Laporan</button>
+                        </div>
+                    </div>
+                    <div class="card-report">
+                        <div class="card-report-body">
+                            <div class="report-icon-box text-amber bg-amber-light"><i class="fa-solid fa-receipt"></i></div>
+                            <h3>Rekap Transaksi Sirkulasi</h3>
+                            <p>Riwayat pinjam-kembali buku serta detail detail peminjaman database.</p>
+                        </div>
+                        <div class="report-actions">
+                            <button onclick="cetakDokumen('Sirkulasi')" class="btn-report-print">Cetak Laporan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="printTargetContainer" class="print-target hidden">
+                </div>
+            </section>
+
+            <section id="tab-cari" class="tab-content hidden">
+                <div class="content-heading">
+                    <h1>Katalog Pencarian Buku Online</h1>
+                    <p>Siswa dapat melakukan pencarian ketersediaan buku dan melakukan peminjaman mandiri.</p>
+                </div>
+
+                <div class="search-bar-container">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="inputCariSiswa" oninput="renderCariSiswa()" placeholder="Ketik judul buku, pengarang, atau kategori...">
+                </div>
+
+                <div id="gridCariSiswa" class="books-grid">
+                </div>
+            </section>
+
+            <section id="tab-statusSiswa" class="tab-content hidden">
+                <div class="content-heading">
+                    <h1>Status Histori & Peminjaman Saya</h1>
+                    <p>Transparansi data riwayat buku yang Anda pinjam berdasarkan akun Anggota Siswa aktif.</p>
+                </div>
+                <div class="table-container">
+                    <table class="main-table">
+                        <thead>
+                            <tr>
+                                <th>ID Transaksi</th>
+                                <th>Judul Buku</th>
+                                <th>Tanggal Pinjam</th>
+                                <th>Batas Pengembalian</th>
+                                <th class="text-center">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableStatusSiswaBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+    
+    <div id="modalBuku" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Tambah Data Katalog Buku</h3>
+                <button onclick="closeModal('modalBuku')" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="formBuku" onsubmit="saveBuku(event)" class="modal-form">
+                <div class="form-group">
+                    <label>Judul Buku</label>
+                    <input type="text" id="bukuJudul" required>
+                </div>
+                <div class="form-group">
+                    <label>Nama Pengarang</label>
+                    <input type="text" id="bukuPengarang" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group w-50">
+                        <label>Kategori</label>
+                        <select id="bukuKategori">
+                            <option value="Sains & Matematika">Sains & Matematika</option>
+                            <option value="Sosial & Sejarah">Sosial & Sejarah</option>
+                            <option value="Bahasa & Sastra">Bahasa & Sastra</option>
+                            <option value="Komputer & Teknologi">Komputer & Teknologi</option>
+                            <option value="Fiksi & Novel">Fiksi & Novel</option>
+                        </select>
+                    </div>
+                    <div class="form-group w-50">
+                        <label>Jumlah Stok</label>
+                        <input type="number" id="bukuStok" min="1" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeModal('modalBuku')" class="btn-secondary">Batal</button>
+                    <button type="submit" class="btn btn-emerald">Simpan Buku</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalAnggota" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Registrasi Anggota Baru</h3>
+                <button onclick="closeModal('modalAnggota')" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="formAnggota" onsubmit="saveAnggota(event)" class="modal-form">
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="anggotaNama" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group w-50">
+                        <label>Tipe Anggota</label>
+                        <select id="anggotaTipe">
+                            <option value="Siswa - Kelas X">Siswa - Kelas X</option>
+                            <option value="Siswa - Kelas XI">Siswa - Kelas XI</option>
+                            <option value="Siswa - Kelas XII">Siswa - Kelas XII</option>
+                            <option value="Guru / Staf">Guru / Staf</option>
+                        </select>
+                    </div>
+                    <div class="form-group w-50">
+                        <label>Nomor Kontak (WA)</label>
+                        <input type="text" id="anggotaKontak" placeholder="08xx..." required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeModal('modalAnggota')" class="btn-secondary">Batal</button>
+                    <button type="submit" class="btn btn-purple">Daftarkan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modalSirkulasi" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Pencatatan Peminjaman Buku</h3>
+                <button onclick="closeModal('modalSirkulasi')" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="formSirkulasi" onsubmit="saveSirkulasi(event)" class="modal-form">
+                <div class="form-group">
+                    <label>Pilih Anggota</label>
+                    <select id="sirkulasiAnggota" required>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Pilih Buku (Validasi Stok)</label>
+                    <select id="sirkulasiBuku" required>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" onclick="closeModal('modalSirkulasi')" class="btn-secondary">Batal</button>
+                    <button type="submit" class="btn btn-amber">Proses Pinjam</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
